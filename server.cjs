@@ -1,13 +1,19 @@
-const http = require('http'), https = require('https'), fs = require('fs'), path = require('path');
+const http = require('http'), 
+      https = require('https'), 
+      fs = require('fs'), 
+      path = require('path');
 
 const PORT = process.env.PORT || 3001;
-
-server.listen(PORT, '0.0.0.0', () => {
-    console.log(`Server is running on port ${PORT}`);
-});
 const KEY = process.env.GEMINI_API_KEY;
 const HOST = 'generativelanguage.googleapis.com';
-const MIME = { '.html': 'text/html', '.js': 'application/javascript', '.png': 'image/png', '.jpg': 'image/jpeg', '.ico': 'image/x-icon', '.json': 'application/json' };
+const MIME = { 
+    '.html': 'text/html', 
+    '.js': 'application/javascript', 
+    '.png': 'image/png', 
+    '.jpg': 'image/jpeg', 
+    '.ico': 'image/x-icon', 
+    '.json': 'application/json' 
+};
 
 const sleep = (ms) => new Promise(res => setTimeout(res, ms));
 
@@ -44,7 +50,8 @@ async function callGemini(model, body, attempt = 1) {
     });
 }
 
-http.createServer(async (req, res) => {
+// 1. Create the server first
+const server = http.createServer(async (req, res) => {
     res.setHeader('Access-Control-Allow-Origin', '*');
     if (req.method === 'OPTIONS') {
         res.writeHead(204, { 'Access-Control-Allow-Methods': 'POST,GET,OPTIONS', 'Access-Control-Allow-Headers': 'Content-Type' });
@@ -59,8 +66,6 @@ http.createServer(async (req, res) => {
             try {
                 const raw = Buffer.concat(chunks).toString('utf8');
                 const parsed = JSON.parse(raw);
-                
-                // Using Gemini 2.5 Flash (Active as of Feb 2026)
                 const model = 'gemini-2.5-flash'; 
                 delete parsed.model;
                 const body = JSON.stringify(parsed);
@@ -68,7 +73,6 @@ http.createServer(async (req, res) => {
                 console.log(`[proxy] -> Requesting ${model}`);
                 const result = await callGemini(model, body);
                 
-                console.log(`[proxy] <- Status: ${result.status}`);
                 res.writeHead(result.status, { 'Content-Type': 'application/json' });
                 res.end(result.data);
             } catch (e) {
@@ -85,6 +89,9 @@ http.createServer(async (req, res) => {
         res.writeHead(200, { 'Content-Type': MIME[path.extname(fp).toLowerCase()] || 'text/plain' });
         res.end(d);
     });
-}).listen(PORT, () => {
+});
+
+// 2. Then call .listen() on that variable
+server.listen(PORT, '0.0.0.0', () => {
     console.log(`Server live at port ${PORT}`);
 });
