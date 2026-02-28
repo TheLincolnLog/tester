@@ -1,6 +1,10 @@
 const http = require('http'), https = require('https'), fs = require('fs'), path = require('path');
 
 const PORT = process.env.PORT || 3001;
+
+server.listen(PORT, '0.0.0.0', () => {
+    console.log(`Server is running on port ${PORT}`);
+});
 const KEY = process.env.GEMINI_API_KEY;
 const HOST = 'generativelanguage.googleapis.com';
 const MIME = { '.html': 'text/html', '.js': 'application/javascript', '.png': 'image/png', '.jpg': 'image/jpeg', '.ico': 'image/x-icon', '.json': 'application/json' };
